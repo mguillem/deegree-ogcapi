@@ -1,0 +1,23 @@
+{
+  "name": "deegree-ogcapi",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+	"bootstrap": "4.4.1",
+    "bootstrap-vue": "2.5.0",
+	"jquery": "3.4.1",
+    "ol": "v6.15.1",
+	"popper.js": "1.16.0",
+    "proj4": "2.6.1",
+    "vue": "2.6.11",
+    "vue-meta": "2.4.0",
+	"vue-router": "2.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.110.3",
+    "webpack-cli": "^7.2.3"
+  }
+}
+
