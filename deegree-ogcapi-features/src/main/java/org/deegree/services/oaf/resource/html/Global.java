@@ -22,6 +22,7 @@
 package org.deegree.services.oaf.resource.html;
 
 import io.swagger.v3.oas.annotations.Operation;
+import org.apache.commons.io.IOUtils;
 import org.deegree.services.oaf.config.htmlview.HtmlViewConfiguration;
 import org.deegree.services.oaf.domain.html.HtmlPageConfiguration;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
@@ -36,9 +37,12 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.TEXT_HTML;
 
 /**
  * @author <a href="mailto:goltz@lat-lon.de">Lyn Goltz </a>
@@ -53,7 +57,7 @@ public class Global {
 	private DeegreeWorkspaceInitializer deegreeWorkspaceInitializer;
 
 	@Operation(hidden = true)
-	@Path("css/main.css")
+	@Path("/css/{path: .+\\.css$}")
 	@GET
 	public InputStream getDefaultCssFile() throws FileNotFoundException {
 		HtmlViewConfiguration globalHtmlViewConfiguration = deegreeWorkspaceInitializer
@@ -66,8 +70,15 @@ public class Global {
 	@Operation(hidden = true)
 	@Path("/js/{path: .+\\.js$}")
 	@GET
-	public Response getVueFile(@PathParam("path") String path) {
+	public Response getJsFile(@PathParam("path") String path) {
 		return Response.ok(getClass().getResourceAsStream("/js/%s".formatted(path)), "text/javascript").build();
+	}
+
+	@Operation(hidden = true)
+	@Path("/js/{path: .+\\.js\\.map$}")
+	@GET
+	public Response getJsFileMap(@PathParam("path") String path) {
+		return Response.ok(getClass().getResourceAsStream("/js/%s".formatted(path)), "application/json").build();
 	}
 
 	@Operation(hidden = true)
@@ -84,6 +95,12 @@ public class Global {
 		HtmlPageConfiguration configuration = new HtmlPageConfiguration(globalHtmlViewConfiguration.getLegalNoticeUrl(),
 				globalHtmlViewConfiguration.getPrivacyUrl(), globalHtmlViewConfiguration.getDocumentationUrl());
 		return Response.ok(configuration, APPLICATION_JSON).build();
+	}
+
+	public static Response htmlIndexPage(ServletContext servletContext) throws IOException {
+		String content = IOUtils.resourceToString("/index.html", StandardCharsets.UTF_8);
+		content = content.replace("/to-be-replaced-by-context-path", servletContext.getContextPath());
+		return Response.ok(content, TEXT_HTML).build();
 	}
 
 }

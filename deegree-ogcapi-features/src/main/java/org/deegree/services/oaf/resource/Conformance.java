@@ -31,12 +31,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.deegree.services.oaf.RequestFormat;
 import org.deegree.services.oaf.exceptions.InvalidParameterValue;
 import org.deegree.services.oaf.link.Link;
-
+import org.deegree.services.oaf.resource.html.Global;
+import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +63,9 @@ import static org.deegree.services.oaf.domain.conformance.ConformanceClass.OPENA
  */
 @Path("/datasets/{datasetId}/conformance")
 public class Conformance {
+
+	@Context
+	ServletContext servletContext;
 
 	@GET
 	@Produces({ APPLICATION_JSON })
@@ -90,8 +97,8 @@ public class Conformance {
 	public Response conformanceHtml(
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws InvalidParameterValue {
-		return conformance(format, RequestFormat.HTML);
+			throws InvalidParameterValue, IOException {
+		return Global.htmlIndexPage(servletContext);
 	}
 
 	@GET
@@ -105,9 +112,6 @@ public class Conformance {
 
 	private Response conformance(String formatParamValue, RequestFormat defaultFormat) throws InvalidParameterValue {
 		RequestFormat requestFormat = byFormatParameter(formatParamValue, defaultFormat);
-		if (RequestFormat.HTML.equals(requestFormat)) {
-			return Response.ok(getClass().getResourceAsStream("/conformance.html"), TEXT_HTML).build();
-		}
 		List<Link> conformsTo = createConformsTo();
 		org.deegree.services.oaf.domain.conformance.Conformance conformance = new org.deegree.services.oaf.domain.conformance.Conformance(
 				conformsTo);

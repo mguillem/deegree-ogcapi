@@ -29,6 +29,7 @@ import static org.deegree.services.oaf.RequestFormat.JSON;
 import static org.deegree.services.oaf.RequestFormat.XML;
 import static org.deegree.services.oaf.RequestFormat.byFormatParameter;
 
+import java.io.IOException;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,6 +54,7 @@ import org.deegree.services.oaf.exceptions.InvalidParameterValue;
 import org.deegree.services.oaf.exceptions.UnknownDatasetId;
 import org.deegree.services.oaf.link.Link;
 import org.deegree.services.oaf.link.LinkBuilder;
+import org.deegree.services.oaf.resource.html.Global;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
 import org.deegree.services.oaf.workspace.configuration.DatasetMetadata;
 import org.deegree.services.oaf.workspace.configuration.OafDatasetConfiguration;
@@ -75,7 +77,7 @@ public class LandingPage {
 	public Response landingPageJson(@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
-			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue {
+			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue, IOException {
 		return landingPage(uriInfo, servletRequest, datasetId, format, JSON, APPLICATION_JSON);
 	}
 
@@ -86,7 +88,7 @@ public class LandingPage {
 	public Response landingPageJsonXml(@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
-			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue {
+			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue, IOException {
 		return landingPage(uriInfo, servletRequest, datasetId, format, XML, APPLICATION_XML);
 	}
 
@@ -96,7 +98,7 @@ public class LandingPage {
 	public Response landingPageHtml(@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
-			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue {
+			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue, IOException {
 		return landingPage(uriInfo, servletRequest, datasetId, format, HTML, TEXT_HTML);
 	}
 
@@ -105,17 +107,17 @@ public class LandingPage {
 	public Response landingPageOther(@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
-			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue {
+			@PathParam("datasetId") String datasetId) throws UnknownDatasetId, InvalidParameterValue, IOException {
 		return landingPage(uriInfo, servletRequest, datasetId, format, JSON, APPLICATION_JSON);
 	}
 
 	private Response landingPage(UriInfo uriInfo, HttpServletRequest servletRequest, String datasetId,
 			String formatParamValue, RequestFormat defaultFormat, String requestedMediaTyp)
-			throws UnknownDatasetId, InvalidParameterValue {
+			throws UnknownDatasetId, InvalidParameterValue, IOException {
 		OafDatasetConfiguration dataset = deegreeWorkspaceInitializer.getOafDatasets().getDataset(datasetId);
 		RequestFormat requestFormat = byFormatParameter(formatParamValue, defaultFormat);
 		if (HTML.equals(requestFormat)) {
-			return Response.ok(getClass().getResourceAsStream("/landingpage.html"), TEXT_HTML).build();
+			return Global.htmlIndexPage(servletRequest.getServletContext());
 		}
 
 		DatasetMetadata metadata = dataset.getServiceMetadata();

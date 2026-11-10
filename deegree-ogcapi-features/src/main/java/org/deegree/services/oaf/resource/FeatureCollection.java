@@ -28,6 +28,7 @@ import static org.deegree.services.oaf.RequestFormat.HTML;
 import static org.deegree.services.oaf.RequestFormat.JSON;
 import static org.deegree.services.oaf.RequestFormat.XML;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import org.deegree.services.oaf.exceptions.UnknownCollectionId;
 import org.deegree.services.oaf.exceptions.UnknownDatasetId;
 import org.deegree.services.oaf.link.Link;
 import org.deegree.services.oaf.link.LinkBuilder;
+import org.deegree.services.oaf.resource.html.Global;
 import org.deegree.services.oaf.workspace.DataAccess;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
 import org.deegree.services.oaf.workspace.configuration.OafDatasetConfiguration;
@@ -88,7 +90,7 @@ public class FeatureCollection {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
 			@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest)
-			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue {
+			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, JSON, APPLICATION_JSON);
 		return collection(datasetId, collectionId, uriInfo, servletRequest, requestedMediaType);
 	}
@@ -101,7 +103,7 @@ public class FeatureCollection {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
 			@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest)
-			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue {
+			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, XML, APPLICATION_XML);
 		return collection(datasetId, collectionId, uriInfo, servletRequest, requestedMediaType);
 	}
@@ -114,7 +116,7 @@ public class FeatureCollection {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
 			@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest)
-			throws UnknownCollectionId, InvalidParameterValue, UnknownDatasetId {
+			throws UnknownCollectionId, InvalidParameterValue, UnknownDatasetId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML);
 		return collection(datasetId, collectionId, uriInfo, servletRequest, requestedMediaType);
 	}
@@ -126,19 +128,19 @@ public class FeatureCollection {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format,
 			@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest)
-			throws UnknownCollectionId, InvalidParameterValue, UnknownDatasetId {
+			throws UnknownCollectionId, InvalidParameterValue, UnknownDatasetId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, JSON, APPLICATION_JSON);
 		return collection(datasetId, collectionId, uriInfo, servletRequest, requestedMediaType);
 	}
 
 	private Response collection(String datasetId, String collectionId, UriInfo uriInfo,
 			HttpServletRequest servletRequest, RequestedMediaType requestedMediaTyp)
-			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue {
+			throws UnknownCollectionId, UnknownDatasetId, InvalidParameterValue, IOException {
 		RequestFormat requestFormat = requestedMediaTyp.getRequestFormat();
 		OafDatasetConfiguration oafConfiguration = deegreeWorkspaceInitializer.getOafDatasets().getDataset(datasetId);
 		oafConfiguration.checkCollection(collectionId);
 		if (HTML.equals(requestFormat)) {
-			return Response.ok(getClass().getResourceAsStream("/collection.html"), TEXT_HTML).build();
+			return Global.htmlIndexPage(servletRequest.getServletContext());
 		}
 		LinkBuilder linkBuilder = new LinkBuilder(uriInfo, servletRequest, requestedMediaTyp.getSelfMediaType());
 		Collection collection = dataAccess.createCollection(oafConfiguration, collectionId, linkBuilder);

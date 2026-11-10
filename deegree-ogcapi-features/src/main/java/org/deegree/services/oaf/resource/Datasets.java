@@ -23,9 +23,9 @@ package org.deegree.services.oaf.resource;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_HTML;
-import static org.deegree.services.oaf.RequestFormat.HTML;
 import static org.deegree.services.oaf.RequestFormat.JSON;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +49,7 @@ import org.deegree.services.oaf.domain.dataset.Dataset;
 import org.deegree.services.oaf.exceptions.InvalidParameterValue;
 import org.deegree.services.oaf.link.Link;
 import org.deegree.services.oaf.link.LinkBuilder;
+import org.deegree.services.oaf.resource.html.Global;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
 import org.deegree.services.oaf.workspace.configuration.OafDatasetConfiguration;
 import org.deegree.services.oaf.workspace.configuration.OafDatasets;
@@ -79,16 +80,12 @@ public class Datasets {
 	public Response datasetsHtml(@Context UriInfo uriInfo, @Context HttpServletRequest servletRequest,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws InvalidParameterValue {
-		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML);
-		return datasets(uriInfo, servletRequest, requestedMediaType);
+			throws InvalidParameterValue, IOException {
+		return Global.htmlIndexPage(servletRequest.getServletContext());
 	}
 
 	private Response datasets(UriInfo uriInfo, HttpServletRequest servletRequest, RequestedMediaType requestedMediaType)
 			throws InvalidParameterValue {
-		if (HTML.equals(requestedMediaType.getRequestFormat())) {
-			return Response.ok(getClass().getResourceAsStream("/datasets.html"), TEXT_HTML).build();
-		}
 		LinkBuilder linkBuilder = new LinkBuilder(uriInfo, servletRequest, requestedMediaType.getSelfMediaType());
 		List<Link> links = linkBuilder.createDatasetsLinks();
 		List<Dataset> datasets = new ArrayList<>();

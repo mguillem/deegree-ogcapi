@@ -31,6 +31,7 @@ import static org.deegree.services.oaf.RequestFormat.HTML;
 import static org.deegree.services.oaf.RequestFormat.JSON;
 import static org.deegree.services.oaf.RequestFormat.XML;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ import org.deegree.services.oaf.io.request.FeaturesRequestBuilder;
 import org.deegree.services.oaf.io.response.FeaturesResponse;
 import org.deegree.services.oaf.io.response.FeaturesResponseCreator;
 import org.deegree.services.oaf.link.LinkBuilder;
+import org.deegree.services.oaf.resource.html.Global;
 import org.deegree.services.oaf.workspace.DataAccess;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
 import org.deegree.services.oaf.workspace.configuration.FeatureTypeMetadata;
@@ -128,7 +130,7 @@ public class Features {
 					style = ParameterStyle.FORM) @QueryParam("crs") String crs,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId {
+			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, JSON, APPLICATION_GEOJSON,
 				APPLICATION_GEOJSON);
 		return features(uriInfo, servletRequest, datasetId, collectionId, limit, offset, bulk, bbox, bboxCrs, datetime,
@@ -172,7 +174,7 @@ public class Features {
 					style = ParameterStyle.FORM) @QueryParam("crs") String crs,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId {
+			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, XML, acceptHeader, APPLICATION_GML);
 		return features(uriInfo, servletRequest, datasetId, collectionId, limit, offset, bulk, bbox, bboxCrs, datetime,
 				filter, filterLang, filterCrs, crs, requestedMediaType);
@@ -214,7 +216,7 @@ public class Features {
 					style = ParameterStyle.FORM) @QueryParam("crs") String crs,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException {
+			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML, TEXT_HTML);
 		return features(uriInfo, servletRequest, datasetId, collectionId, limit, offset, bulk, bbox, bboxCrs, datetime,
 				filter, filterLang, filterCrs, crs, requestedMediaType);
@@ -255,7 +257,7 @@ public class Features {
 					style = ParameterStyle.FORM) @QueryParam("crs") String crs,
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
-			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException {
+			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML, TEXT_HTML);
 		return features(uriInfo, servletRequest, datasetId, collectionId, limit, offset, bulk, bbox, bboxCrs, datetime,
 				filter, filterLang, filterCrs, crs, requestedMediaType);
@@ -264,13 +266,13 @@ public class Features {
 	private Response features(UriInfo uriInfo, HttpServletRequest servletRequest, String datasetId, String collectionId,
 			int limit, int offset, boolean isBulkUpload, List<Double> bbox, String bboxCrs, String datetime,
 			String filter, String filterLang, String filterCrs, String crs, RequestedMediaType requestedMediaType)
-			throws UnknownDatasetId, InvalidParameterValue, UnknownCollectionId, InternalQueryException {
+			throws UnknownDatasetId, InvalidParameterValue, UnknownCollectionId, InternalQueryException, IOException {
 		FilterLang.fromType(filterLang);
 		RequestFormat requestFormat = requestedMediaType.getRequestFormat();
 		OafDatasetConfiguration oafConfiguration = deegreeWorkspaceInitializer.getOafDatasets().getDataset(datasetId);
 		oafConfiguration.checkCollection(collectionId);
 		if (HTML.equals(requestFormat)) {
-			return Response.ok(getClass().getResourceAsStream("/features.html"), TEXT_HTML).build();
+			return Global.htmlIndexPage(servletRequest.getServletContext());
 		}
 
 		Map<FilterProperty, List<String>> filterParameters = findQueryableParameters(datasetId, collectionId,

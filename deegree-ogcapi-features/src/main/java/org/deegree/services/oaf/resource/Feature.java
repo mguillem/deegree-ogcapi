@@ -31,6 +31,8 @@ import static org.deegree.services.oaf.RequestFormat.HTML;
 import static org.deegree.services.oaf.RequestFormat.JSON;
 import static org.deegree.services.oaf.RequestFormat.XML;
 
+import java.io.IOException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
@@ -58,6 +60,7 @@ import org.deegree.services.oaf.exceptions.UnknownFeatureId;
 import org.deegree.services.oaf.io.response.FeatureResponse;
 import org.deegree.services.oaf.io.response.FeaturesResponseCreator;
 import org.deegree.services.oaf.link.LinkBuilder;
+import org.deegree.services.oaf.resource.html.Global;
 import org.deegree.services.oaf.workspace.DataAccess;
 import org.deegree.services.oaf.workspace.DeegreeWorkspaceInitializer;
 import org.deegree.services.oaf.workspace.configuration.OafDatasetConfiguration;
@@ -89,7 +92,7 @@ public class Feature {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
 			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId,
-			UnknownFeatureId {
+			UnknownFeatureId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, JSON, APPLICATION_GEOJSON);
 		return feature(uriInfo, servletRequest, datasetId, collectionId, featureId, crs, requestedMediaType);
 	}
@@ -106,7 +109,7 @@ public class Feature {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
 			throws UnknownCollectionId, InternalQueryException, InvalidParameterValue, UnknownDatasetId,
-			UnknownFeatureId {
+			UnknownFeatureId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, XML, acceptHeader, APPLICATION_GML);
 		return feature(uriInfo, servletRequest, datasetId, collectionId, featureId, crs, requestedMediaType);
 	}
@@ -122,7 +125,7 @@ public class Feature {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
 			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException,
-			UnknownFeatureId {
+			UnknownFeatureId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML);
 		return feature(uriInfo, servletRequest, datasetId, collectionId, featureId, crs, requestedMediaType);
 	}
@@ -137,18 +140,18 @@ public class Feature {
 			@Parameter(description = "The request output format.", style = ParameterStyle.FORM,
 					schema = @Schema(allowableValues = { "json", "html", "xml" })) @QueryParam("f") String format)
 			throws InvalidParameterValue, UnknownDatasetId, UnknownCollectionId, InternalQueryException,
-			UnknownFeatureId {
+			UnknownFeatureId, IOException {
 		RequestedMediaType requestedMediaType = new RequestedMediaType(format, HTML, TEXT_HTML);
 		return feature(uriInfo, servletRequest, datasetId, collectionId, featureId, crs, requestedMediaType);
 	}
 
 	private Response feature(UriInfo uriInfo, HttpServletRequest servletRequest, String datasetId, String collectionId,
 			String featureId, String crs, RequestedMediaType requestedMediaType) throws UnknownCollectionId,
-			InternalQueryException, InvalidParameterValue, UnknownDatasetId, UnknownFeatureId {
+			InternalQueryException, InvalidParameterValue, UnknownDatasetId, UnknownFeatureId, IOException {
 		OafDatasetConfiguration oafConfiguration = deegreeWorkspaceInitializer.getOafDatasets().getDataset(datasetId);
 		oafConfiguration.checkCollection(collectionId);
 		if (HTML.equals(requestedMediaType.getRequestFormat())) {
-			return Response.ok(getClass().getResourceAsStream("/feature.html"), TEXT_HTML).build();
+			return Global.htmlIndexPage(servletRequest.getServletContext());
 		}
 
 		LinkBuilder linkBuilder = new LinkBuilder(uriInfo, servletRequest, requestedMediaType.getSelfMediaType());

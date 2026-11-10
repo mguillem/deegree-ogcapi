@@ -47,8 +47,8 @@
 	    <artifactId>frontend-maven-plugin</artifactId>
 	    <version>2.0.2</version>
 	    <configuration>
-	      <npmVersion>12.2.0</npmVersion>
-	      <nodeVersion>v26.5.1</nodeVersion>
+	      <npmVersion>12.2.1</npmVersion>
+	      <nodeVersion>v26.12.0</nodeVersion>
 	      <workingDirectory>src/main/frontend</workingDirectory>
 	    </configuration>
 	    <executions>
@@ -69,8 +69,41 @@
 	          <arguments>install</arguments>
 	        </configuration>
 	      </execution>
+	      <execution>
+	        <id>npm run build</id>
+	        <goals>
+	          <goal>npm</goal>
+	        </goals>
+	        <phase>generate-resources</phase>
+	        <configuration>
+	          <arguments>run build</arguments>
+	        </configuration>
+	      </execution>
 	    </executions>
 	  </plugin>
+	  <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-resource</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>src/main/frontend/dist</directory>
+                  <excludes>
+                    <exclude>mockdata/**</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
