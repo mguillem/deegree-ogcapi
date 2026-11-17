@@ -71,24 +71,24 @@
 </style>
 
 <script>
-import Map from 'ol/Map.js';
-import TileLayer from 'ol/layer/Tile.js'
-import View from 'ol/View.js';
-import TileWMS from 'ol/source/TileWMS.js';
-import {fromExtent} from 'ol/geom/Polygon';
-import GeoJSON from 'ol/format/GeoJSON.js';
-import VectorLayer from 'ol/layer/Vector.js';
-import Style from 'ol/style/Style.js';
-import Fill from 'ol/style/Fill.js';
-import Stroke from 'ol/style/Stroke.js';
-import * as olProj from 'ol/proj';
-import {register} from 'ol/proj/proj4.js';
-import * as olExtent from 'ol/extent';
-import Feature from 'ol/Feature.js';
-import * as olLoadingstrategy from 'ol/loadingstrategy';
 import Attribution from 'ol/control/Attribution.js';
 import {defaults} from 'ol/control/defaults';
+import Feature from 'ol/Feature.js';
+import Fill from 'ol/style/Fill.js';
+import {fromExtent} from 'ol/geom/Polygon';
+import GeoJSON from 'ol/format/GeoJSON.js';
+import Map from 'ol/Map.js';
+import * as olExtent from 'ol/extent';
+import * as olLoadingstrategy from 'ol/loadingstrategy';
+import * as olProj from 'ol/proj';
 import proj4 from 'proj4';
+import {register} from 'ol/proj/proj4.js';
+import Stroke from 'ol/style/Stroke.js';
+import Style from 'ol/style/Style.js';
+import TileLayer from 'ol/layer/Tile.js'
+import TileWMS from 'ol/source/TileWMS.js';
+import View from 'ol/View.js';
+import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
 
 var map
