@@ -100,7 +100,6 @@ function setMapBackgroundAndExtent(wmsUrl, wmsVersion, wmsLayers, crsCode, projD
       })
     });
     map.getLayers().insertAt(0, wmsLayer);
-    console.log("setFeatures", data)
     setFeatures(data, crsCode);
 
     map.on('pointermove', function(evt) {
@@ -132,12 +131,10 @@ function registerCrs(crsCode, projDef){
 
 function setFeatures(featuresJson, crsCode){
   featureSource.clear();
-  console.log("a", crsCode)
   featureSource.addFeatures(featureSource.getFormat().readFeatures(featuresJson, {
                     "dataProjection" : "EPSG:4326",
                     "featureProjection" : crsCode
              }));
-             console.log("b")
 
   var extentGeom = fromExtent(featureSource.getExtent())
   extentGeom.scale(1.2);
@@ -204,16 +201,25 @@ export default {
     name: 'FeatureMap',
     props: {
         geoData: [Array, Object]
-    }
-    ,
+    },
     beforeMount() {
+        // proxied data are not recognized as GeoData, "restore". A better way?
+        var geoData = this.geoData
         var rawData = {
-            type: this.geoData.type,
-            features: []
+            type: geoData.type
         }
-        this.geoData.features.forEach((feature) =>
-            rawData.features.push(feature)
-        )
+        if (geoData.geometry) {
+            rawData.geometry = geoData.geometry 
+        }
+        if (geoData.id) {
+            rawData.id = geoData.id 
+        }
+        if (geoData.features) {
+            rawData.features = []
+            geoData.features.forEach((feature) =>
+                rawData.features.push(feature)
+            )
+        }
         
         fetchConfigAndSetFeature(rawData)
     }

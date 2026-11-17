@@ -36,9 +36,14 @@ function retrieveBreadcrumbs() {
     var parts = appPath.split("/")
     console.log("parts", parts)
     var xmlLinkLabel = "XML"
+    var jsonLinkLabel = "JSON"
     var pageType = getPageType()
     if (pageType == "datasets") {
         xmlLinkLabel = null
+    }
+    else if (pageType == "feature") {
+        jsonLinkLabel = 'GeoJSON'
+        xmlLinkLabel = 'GML'
     }
     
     var data = {
@@ -47,7 +52,8 @@ function retrieveBreadcrumbs() {
         datasetLink: parts.length > 0 ? baseUrl + "/datasets/" + parts[0] : null,
         collectionLink: parts.length > 2 ? parts[2]: null,
         itemsLink: parts.length > 4 ? parts[3]: null,
-        featureId: parts.length > 5 ? parts[4]: null,
+        jsonLinkLabel: jsonLinkLabel,
+        featureId: parts.length > 4 ? parts[4]: null,
         xmlLinkLabel: xmlLinkLabel
     }
     if (pageType == "conformance") {

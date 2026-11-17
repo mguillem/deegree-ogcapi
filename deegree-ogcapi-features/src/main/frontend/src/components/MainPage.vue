@@ -26,7 +26,7 @@
                 </ul>
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
-                        <a class="nav-link" href="?f=json" target="_blank">JSON</a>
+                        <a class="nav-link" href="?f=json" target="_blank">{{ jsonLinkLabel }}</a>
                     </li>
                     <li class="nav-item" v-if="xmlLinkLabel">
                         <a class="nav-link" href="?f=xml" target="_blank">{{ xmlLinkLabel }}</a>
@@ -63,6 +63,7 @@ export default {
     collectionLink: String,
     itemsLink: String,
     featureId: String,
+    jsonLinkLabel: String,
     xmlLinkLabel: String
   }
 }
