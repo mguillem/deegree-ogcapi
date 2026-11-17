@@ -19,6 +19,15 @@ function retrieveBaseUrl() {
     return featuresRefWithoutQuery;
 }
 
+function getCurrentPageUrlWithQuery(query) {
+    var url = retrieveBaseUrl()
+    if (query) {
+        url += "?" + query
+    }
+
+    return mockUrlIfDev(url)
+}
+
 function getMapConfigUrl() {
     var url = retrieveThisDatasetUrl() + "/config/map"
     return mockUrlIfDev(url)
@@ -27,7 +36,12 @@ function getMapConfigUrl() {
 function mockUrlIfDev(url) {
     if (import.meta.env.DEV) {
         var originalUrl = url
-        url = url.replace("/to-be-replaced-by-context-path", "/to-be-replaced-by-context-path/mockdata") + ".json"
+        var query = ""
+        if (url.indexOf("?") > 0) {
+            query = "_" + url.replace(/.*\?/, '')
+            url = url.replace(/\?.*/, '')
+        }
+        url = url.replace("/to-be-replaced-by-context-path", "/to-be-replaced-by-context-path/mockdata") + query + ".json"
         console.log('DEVELOPMENT! ' + originalUrl + " -> " + url);
     }
     return url
@@ -54,4 +68,4 @@ function getCurrentFeatureCollectionUrl() {
     throw "Wrong context"
 }
 
-export { getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage, getCurrentFeatureCollectionUrl };
+export { getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage, getCurrentFeatureCollectionUrl, getCurrentPageUrlWithQuery };

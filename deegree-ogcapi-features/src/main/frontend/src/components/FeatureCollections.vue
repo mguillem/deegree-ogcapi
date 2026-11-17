@@ -1,4 +1,5 @@
 <template>
+    sss
   <BApp>
     <div class="row">
          <div class="col-lg-12" id="content">
@@ -77,6 +78,9 @@ export default {
         metadataLinks: [ {href: String, title: String} ]
     }],
     licenseLink: {href: String, rel: String, title: String, type: String }
-  }
+  },
+  beforeMount() {
+    console.log("beforeMount")
+}
 }
 </script>

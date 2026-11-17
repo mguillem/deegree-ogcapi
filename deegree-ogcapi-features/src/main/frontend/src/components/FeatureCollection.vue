@@ -186,7 +186,7 @@ export default {
     links: [ {href: String, title: String} ],
     metadataLinks: [ {href: String, title: String} ],
     itemType: String,
-    crs: [String],
+    crs: [String, Array],
     storageCrs: String,
     extent: { temporal: { interval: [String] }}
   },

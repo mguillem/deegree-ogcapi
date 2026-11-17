@@ -149,7 +149,7 @@ else {
         dataType: "json",
         url: url,
         success: function(data) {
-            console.log('Got data. Creating', data)
+            console.log('Got data. Creating', data, toDisplay)
             if (transform) {
                 data = transform(data)
                 console.log('Transformed to', data)
