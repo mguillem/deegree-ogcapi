@@ -8,6 +8,7 @@ import FeatureCollections from './components/FeatureCollections.vue'
 import FeatureCollection from './components/FeatureCollection.vue'
 import FeatureItem from './components/FeatureItem.vue'
 import FeatureItems from './components/FeatureItems.vue'
+import * as api from './backendApi.js';
 
 
 import 'bootstrap/dist/css/bootstrap.css'
@@ -95,18 +96,6 @@ function getPageType() {
 var pageType = getPageType()
 console.log("pageType", pageType)
 
-var url = retrieveBaseUrl()
-if (import.meta.env.DEV) {
-    url = toMockDataUrl(url)
-}
-
-function toMockDataUrl(url) {
-    var originalUrl = url
-    url = url.replace("/to-be-replaced-by-context-path", "/to-be-replaced-by-context-path/mockdata") + ".json"
-    console.log('DEVELOPMENT! ' + originalUrl + " -> " + url);
-    return url    
-}
-
 var toDisplay
 var transform
 
@@ -137,7 +126,6 @@ switch (pageType) {
        break;
     case "features":
         toDisplay = FeatureItems
-        transform = transformFeatureItems;
         break;
     case "feature":
         toDisplay = FeatureItem
@@ -149,6 +137,7 @@ if (!toDisplay) {
     console.error("Nothing to display for", pageType)
 }
 else {
+    var url = api.getJsonDataUrlForCurrentPage()
     console.log('Querying ' + url)
     $.ajax({
         dataType: "json",
@@ -167,7 +156,7 @@ else {
 
 $.ajax({
     dataType: "json",
-    url: createHtmlConfigUrl(),
+    url: api.getHtmlConfigUrl(),
     success: function(data) {
         if (data.documentationUrl) {
             data.helpUrl = data.documentationUrl;
@@ -212,23 +201,6 @@ function parseLinks(data, rel, type){
       return links[0];
 }
 
-function createHtmlConfigUrl() {
-    var baseUrl = retrieveBaseUrl();
-    var indexOfDataset = (baseUrl.lastIndexOf("dataset"))
-    var url = baseUrl.substring(0, indexOfDataset) + "html";
-    if (import.meta.env.DEV) {
-        url = toMockDataUrl(url)
-    }
-    return url
-}
-
-function createMapConfigUrl(){
-    var url = retrieveThisDatasetUrl() + "/config/map"
-    if (import.meta.env.DEV) {
-        url = toMockDataUrl(url)
-    }
-    return url
-}
 
 /*
 function createDocumentationUrl(){
@@ -237,28 +209,6 @@ function createDocumentationUrl(){
   return baseUrl.substring ( 0, indexOfDataset ) + "documentation/index.html#_usage";
 }
 */
-
-function retrieveBaseUrl() {
-    var featuresRefWithoutQuery = window.location.href;
-    if (featuresRefWithoutQuery.indexOf('?') >= 0) {
-        featuresRefWithoutQuery = featuresRefWithoutQuery.substr(0, featuresRefWithoutQuery.indexOf('?'));
-    }
-    if (featuresRefWithoutQuery.endsWith("/")) {
-        featuresRefWithoutQuery = featuresRefWithoutQuery.substr(0, featuresRefWithoutQuery.length - 1);
-    }
-    if (featuresRefWithoutQuery.endsWith(".html")) {
-        featuresRefWithoutQuery = featuresRefWithoutQuery.substr(0, featuresRefWithoutQuery.length - 5);
-    }
-    return featuresRefWithoutQuery;
-}
-
-function retrieveThisDatasetUrl(){
-  var baseUrl = retrieveBaseUrl();
-  var indexIncludeDataset = (baseUrl.lastIndexOf("dataset") + 9)
-  var indexOfDatasetId = baseUrl.substring(indexIncludeDataset, baseUrl.length ).indexOf( "/" ) + indexIncludeDataset;
-  return baseUrl.substring ( 0, indexOfDatasetId );
-}
-
 
 
 function transformDataset(jsonData) {
@@ -334,7 +284,7 @@ function transformFeatureCollection(data) {
 
 
 async function fetchConfigAndSetExtent(bbox, callback) {
-  var configUrl = createMapConfigUrl();
+  var configUrl = api.getMapConfigUrl();
 
   const response = await fetch( configUrl, {headers: {'Accept': 'application/json' } } );
   if( response.status == 200 ){
@@ -343,9 +293,4 @@ async function fetchConfigAndSetExtent(bbox, callback) {
   } else {
     callback('http://sg.geodatenzentrum.de/wms_dtk250', '1.1.1', 'dtk250', null, null, null, bbox);
   }
-}
-
-function transformFeatureItems(data) {
-    fetchConfigAndSetExtent(data, FeatureItems.methods.setMapBackgroundAndExtent);
-    return data   
 }
