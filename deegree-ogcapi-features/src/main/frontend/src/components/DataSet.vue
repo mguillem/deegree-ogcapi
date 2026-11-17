@@ -54,11 +54,11 @@ export default {
   props: {
     description: String,
     title: String,
-    apilink: {href: String, rel: String, title: String, type: String }, 
-    collectionlink: {href: String, rel: String, title: String, type: String },
-    conformanceLink: {href: String, rel: String, title: String, type: String },
-    metadataLink: {href: String, rel: String, title: String, type: String },
-    licenseLink: {href: String, rel: String, title: String, type: String },
+    apilink: Object, 
+    collectionlink: Object,
+    conformanceLink: Object,
+    metadataLink: Object,
+    licenseLink: Object,
     contact: {
       name: String,
       email: String
