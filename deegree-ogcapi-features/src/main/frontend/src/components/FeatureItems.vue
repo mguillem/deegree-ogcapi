@@ -1,6 +1,5 @@
 <template>
   <BApp>
-    Not yet ready :-(
     <div class="container" >
         <div class="row" id="collection">
             <div class="col">
@@ -82,6 +81,8 @@
 import {BApp} from 'bootstrap-vue-next'
 import TdAttributeValue from './TdAttributeValue.vue'
 import FeatureMap from './FeatureMap.vue'
+import * as api from '../backendApi.js';
+
 </script>
 
 <script>
@@ -89,12 +90,21 @@ function featureHref(feature) {
     return "items/" + feature.id
 }
 
+async function fetchFeatureCollectionItem(comp) {
+    var url = api.getCurrentFeatureCollectionUrl()
+    const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        }})
+    const result = await response.json();
+       console.log(result);
+       comp.updateFromItem(result)
+}
+
 export default {
   name: 'FeatureItems',
   props: {
-    title: String,
     type: String,
-    description: String,
     features: [{
         id: String,
         properties: [{
@@ -103,22 +113,20 @@ export default {
         }]
     }]
   },
-  /*
-  computed: {
-    cleanedFeatures() {
-        var list = []
-        this.features.forEach(function(feature) {
-            list.push({
-                id: feature.id,
-                properties: cleanProperties(feature.properties)
-            })
-        })
-        return list; 
+  data() {
+    return {
+      title: '',
+      description: ''
+    }
+  },
+  methods: {
+      updateFromItem(item) {
+        this.title = item.title
+        this.description = item.description
       }
     },
-    methods: {
-      setMapBackgroundAndExtent: setMapBackgroundAndExtent
-    }
-    */
+  beforeMount() {
+    fetchFeatureCollectionItem(this)
+  }
 }
 </script>

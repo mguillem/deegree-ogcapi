@@ -21,36 +21,37 @@ function retrieveBaseUrl() {
 
 function getMapConfigUrl() {
     var url = retrieveThisDatasetUrl() + "/config/map"
+    return mockUrlIfDev(url)
+}
+
+function mockUrlIfDev(url) {
     if (import.meta.env.DEV) {
-        url = toMockDataUrl(url)
+        var originalUrl = url
+        url = url.replace("/to-be-replaced-by-context-path", "/to-be-replaced-by-context-path/mockdata") + ".json"
+        console.log('DEVELOPMENT! ' + originalUrl + " -> " + url);
     }
     return url
 }
 
-function toMockDataUrl(url) {
-    var originalUrl = url
-    url = url.replace("/to-be-replaced-by-context-path", "/to-be-replaced-by-context-path/mockdata") + ".json"
-    console.log('DEVELOPMENT! ' + originalUrl + " -> " + url);
-    return url    
-}
 
 function getJsonDataUrlForCurrentPage() {
     var url = retrieveBaseUrl()
-    if (import.meta.env.DEV) {
-        url = toMockDataUrl(url)
-    }
-    return url
+    return mockUrlIfDev(url)
 }
 
 function getHtmlConfigUrl() {
     var baseUrl = retrieveBaseUrl();
     var indexOfDataset = (baseUrl.lastIndexOf("dataset"))
     var url = baseUrl.substring(0, indexOfDataset) + "html";
-    if (import.meta.env.DEV) {
-        url = toMockDataUrl(url)
-    }
-    return url
+    return mockUrlIfDev(url)
 }
 
+function getCurrentFeatureCollectionUrl() {
+    var url = retrieveBaseUrl()
+    if (url.endsWith("/items")) {
+        return mockUrlIfDev(url.replace("/items", ""))
+    }
+    throw "Wrong context"
+}
 
-export { getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage };
+export { getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage, getCurrentFeatureCollectionUrl };

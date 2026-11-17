@@ -41,7 +41,7 @@ function retrieveBreadcrumbs() {
     if (pageType == "datasets") {
         xmlLinkLabel = null
     }
-    else if (pageType == "feature") {
+    else if (pageType == "features" || pageType == "feature") {
         jsonLinkLabel = 'GeoJSON'
         xmlLinkLabel = 'GML'
     }
