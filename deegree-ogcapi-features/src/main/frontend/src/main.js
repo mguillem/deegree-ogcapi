@@ -136,6 +136,7 @@ switch (pageType) {
        break;
     case "features":
         toDisplay = FeatureItems
+        transform = transformFeatureItems;
         
    break;
 }
@@ -323,21 +324,24 @@ function parseMetadataLinks(links){
 
 function transformFeatureCollection(data) {
     data.metadataLinks = parseMetadataLinks(data.links);
-    fetchConfigAndSetExtent(data.extent.spatial.bbox[0]);
+    fetchConfigAndSetExtent(data.extent.spatial.bbox[0], FeatureCollection.methods.setMapBackgroundAndExtent);
     return data
 }
 
 
-async function fetchConfigAndSetExtent(bbox) {
+async function fetchConfigAndSetExtent(bbox, callback) {
   var configUrl = createMapConfigUrl();
 
   const response = await fetch( configUrl, {headers: {'Accept': 'application/json' } } );
   if( response.status == 200 ){
     const json = await response.json();
-    FeatureCollection.methods.setMapBackgroundAndExtent(json.wmsUrl, json.wmsVersion, json.wmsLayers, json.crsCode, json.crsProj4Definition, json.source, bbox);
+    callback(json.wmsUrl, json.wmsVersion, json.wmsLayers, json.crsCode, json.crsProj4Definition, json.source, bbox);
   } else {
-    FeatureCollection.methods.setMapBackgroundAndExtent('http://sg.geodatenzentrum.de/wms_dtk250', '1.1.1', 'dtk250', null, null, null, bbox);
+    callback('http://sg.geodatenzentrum.de/wms_dtk250', '1.1.1', 'dtk250', null, null, null, bbox);
   }
 }
 
-
+function transformFeatureItems(data) {
+    fetchConfigAndSetExtent(data, FeatureItems.methods.setMapBackgroundAndExtent);
+    return data   
+}
