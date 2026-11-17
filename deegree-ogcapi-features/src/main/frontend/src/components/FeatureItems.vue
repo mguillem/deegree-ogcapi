@@ -47,22 +47,7 @@
                                                         -->
                                                     <tr v-for="(property, attribute) in feature.properties" :key="property">
                                                         <td v-cloak>{{ attribute }}</td>
-                                                        <td v-cloak v-if="(typeof property) == 'string' && property.startsWith('http')" >
-                                                            <a v-bind:href="property" target="_blank" v-bind:title="property" >{{ truncate(property, 50) }}</a>
-                                                        </td>
-                                                        <td v-cloak v-else-if="Array.isArray(property) && property.length > 0 && typeof(property[0]) !== 'object'" >
-                                                            <ul class="propertylist">
-                                                                <li v-for="item in property" :key="item">
-                                                                    {{ item }}
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                        <td v-cloak v-else-if="(Array.isArray(property) && property.length > 0) || typeof(property) === 'object'" >
-                                                            <a href="?f=json" target="_blank">Complex object, view as json</a>
-                                                            <!-- TODO_ v-bind:href="data.item.jsonLink"-->
-                                                        </td>
-                                                        <td v-cloak v-else>{{ truncate(property, 50) }}</td>
-                                                    <!-- TODO_ was: {{ property | truncate(50) }} -->
+                                                        <TdAttributeValue :value="property" :jsonLink="feature.id + '?f=json'"></TdAttributeValue>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -126,6 +111,7 @@
 
 <script setup>
 import {BApp} from 'bootstrap-vue-next'
+import TdAttributeValue from './TdAttributeValue.vue'
 </script>
 
 <script>
@@ -149,14 +135,6 @@ import VectorSource from 'ol/source/Vector.js';
 import View from 'ol/View.js';
 
 
-
-function truncate(s, maxSize) {
-    if (s.length > maxSize) {
-        return s.substring(0, maxSize) + "..."
-    }
-    return s
-}
-
 function featureHref(feature) {
     return "items/" + feature.id
 }
@@ -171,6 +149,7 @@ function cleanProperties(properties) {
         return s
     }
     for (var k in properties) {
+        console.log("property", k, value, (typeof value == "string"))
         var value = properties[k]
         list.push({
             name: k,

@@ -6,6 +6,7 @@ import CustomFooter from './components/CustomFooter.vue'
 import MainPage from './components/MainPage.vue'
 import FeatureCollections from './components/FeatureCollections.vue'
 import FeatureCollection from './components/FeatureCollection.vue'
+import FeatureItem from './components/FeatureItem.vue'
 import FeatureItems from './components/FeatureItems.vue'
 
 
@@ -137,6 +138,9 @@ switch (pageType) {
     case "features":
         toDisplay = FeatureItems
         transform = transformFeatureItems;
+        break;
+    case "feature":
+        toDisplay = FeatureItem
         
    break;
 }
@@ -155,7 +159,7 @@ else {
                 data = transform(data)
                 console.log('Transformed to', data)
             }
-    
+
             createApp(toDisplay, data).mount('#appContent')
         }
     })
