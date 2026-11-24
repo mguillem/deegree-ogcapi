@@ -35,7 +35,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,12 +58,8 @@ public class Global {
 	@Operation(hidden = true)
 	@Path("/css/{path: .+\\.css$}")
 	@GET
-	public InputStream getDefaultCssFile() throws FileNotFoundException {
-		HtmlViewConfiguration globalHtmlViewConfiguration = deegreeWorkspaceInitializer
-			.getGlobalHtmlViewConfiguration();
-		if (globalHtmlViewConfiguration != null && globalHtmlViewConfiguration.getCssFile() != null)
-			return new FileInputStream(globalHtmlViewConfiguration.getCssFile());
-		return getClass().getResourceAsStream("/css/main.css");
+	public InputStream getDefaultCssFile(@PathParam("path") String path) throws FileNotFoundException {
+		return getClass().getResourceAsStream("/css/%s".formatted(path));
 	}
 
 	@Operation(hidden = true)

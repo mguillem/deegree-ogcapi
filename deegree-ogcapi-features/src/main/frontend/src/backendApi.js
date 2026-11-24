@@ -53,10 +53,14 @@ function getJsonDataUrlForCurrentPage() {
     return mockUrlIfDev(url)
 }
 
-function getHtmlConfigUrl() {
+function getAppBaseUrl() {
     var baseUrl = retrieveBaseUrl();
-    var indexOfDataset = (baseUrl.lastIndexOf("dataset"))
-    var url = baseUrl.substring(0, indexOfDataset) + "html";
+    var indexOfDataset = (baseUrl.lastIndexOf("datasets"))
+    return baseUrl.substring(0, indexOfDataset);
+    
+}
+function getHtmlConfigUrl() {
+    var url = getAppBaseUrl() + "html";
     return mockUrlIfDev(url)
 }
 
@@ -68,4 +72,50 @@ function getCurrentFeatureCollectionUrl() {
     throw "Wrong context"
 }
 
-export { getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage, getCurrentFeatureCollectionUrl, getCurrentPageUrlWithQuery };
+async function fetchData() {
+    var url = mockUrlIfDev(retrieveBaseUrl())
+    const response = await fetch(url, {
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    if (!response.ok) {
+       throw new Error(`Response status: ${response.status}`);
+     }
+    const data = await response.json();
+    console.log("got data", data);
+    return data
+}
+
+function getAppRelativePath(path) {
+    var baseUrl = getAppBaseUrl()
+    if (path && path.indexOf(baseUrl) == 0) {
+        return path.substring(path.indexOf('/', 7))
+    }
+    else {
+        return null
+    }
+}
+
+
+function findLinkByRelAndType(links, rel, type){
+    return links.find((element) => element.rel === rel && element.type === type);
+}
+
+function findMetadataLinks(links){
+  var metadataLinks = links.filter((elt) => elt.rel==='describedBy' && (elt.type==='text/html' || elt.type==='text/plain'));
+
+    if (metadataLinks.length > 0)
+      return metadataLinks;
+    else {
+      return links.filter((elt) => elt.rel === 'describedBy')
+     }
+}
+
+
+export { 
+    fetchData, 
+    findLinkByRelAndType, 
+    findMetadataLinks,
+    getAppBaseUrl,
+    getAppRelativePath, getHtmlConfigUrl, getMapConfigUrl, getJsonDataUrlForCurrentPage, getCurrentFeatureCollectionUrl, getCurrentPageUrlWithQuery };

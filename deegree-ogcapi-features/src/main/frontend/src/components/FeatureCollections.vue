@@ -1,5 +1,4 @@
 <template>
-    sss
   <BApp>
     <div class="row">
          <div class="col-lg-12" id="content">
@@ -15,7 +14,7 @@
                                  <div class="col-sm-2">Links</div>
                                  <div class="col-md-10">
                                    <div v-for="link in collection.links" :key="link.title">
-                                       <a v-cloak v-if="link.type == 'text/html' && link.rel != 'alternate' && link.rel != 'describedBy'" v-bind:href="link.href">{{ link.title }}</a>
+                                       <SmartLink v-if="link.type == 'text/html' && link.rel != 'alternate' && link.rel != 'describedBy'" :href="link.href">{{ link.title }}</SmartLink>
                                        <a v-cloak v-else-if="link.type == 'application/json' && link.rel == 'enclosure'" v-bind:href="link.href + '&f=json'" v-bind:download="collection.id + '.json'">{{ link.title }}</a>
                                        <a v-cloak v-else-if="link.type == 'application/xml' && link.rel == 'enclosure'" v-bind:href="link.href + '&f=xml'" v-bind:download="collection.id + '.xml'">{{ link.title }}</a>
                                    </div>
@@ -59,28 +58,42 @@
 
 <script setup>
 import {BApp} from 'bootstrap-vue-next'
+import SmartLink from './SmartLink.vue'
+import * as api from '../backendApi.js';
 </script>
 
 <script>
+async function fetchData(comp) {
+    const data = await api.fetchData() 
+    comp.collections = data.collections.sort((c1, c2) => {
+        const c1Id = c1.id;
+        const c2Id = c2.id;
+        return c1Id.localeCompare(c2Id);
+      });
+    comp.collectionsMetadata = parseCollectionsMetadataLinks(data.collections);
+    comp.licenseLink = api.findLinkByRelAndType(data.links, 'license', 'text/plain');
+
+    return data    
+}
+
+function parseCollectionsMetadataLinks(collections){
+  const metadataLinksPerCollection = {};
+  collections.forEach(function(collection){
+    collection.metadataLinks = api.findMetadataLinks(collection.links);
+  });
+  return metadataLinksPerCollection;
+}
+
 export default {
     name: 'FeatureCollections',
-
-  props: {
-    collections: [{
-        title: String,
-        description: String,
-        id: String,
-        links: [
-        {href: String, rel: String, title: String, type: String }
-        ],
-        crs: [String],
-        storageCrs: String,
-        metadataLinks: [ {href: String, title: String} ]
-    }],
-    licenseLink: {href: String, rel: String, title: String, type: String }
-  },
+    data() {
+      return {
+        collections: [], 
+        licenseLink: {}
+      }
+    },
   beforeMount() {
-    console.log("beforeMount")
-}
+      fetchData(this)
+  }
 }
 </script>

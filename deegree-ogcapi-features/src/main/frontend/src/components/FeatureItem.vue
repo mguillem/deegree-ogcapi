@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div class="col-md">
-                        <FeatureMap :geoData="this"/>
+                        <FeatureMap v-if="type" :geoData="this"/>
                     </div>
                 </div>
 
@@ -52,24 +52,29 @@ import TdAttributeValue from './TdAttributeValue.vue'
 </script>
 
 <script>
+import * as api from '../backendApi.js';
+
+async function fetchData(comp) {
+    const data = await api.fetchData()
+    for (var prop in data) {
+        comp[prop] = data[prop]
+    }
+}
 export default {
   name: 'FeatureItem',
-  props: {
-    crs: String,
-    id: String,
-    geometry: Object,
-    links: [{
-        href: String,
-        rel: String,
-        title: String,
-        type: String
-    }],
-    properties: [{
-        id: String,
-        boreholePath:String  
-    }],
-    srsName: String,
-    type: String
+  data() {
+      return {
+    crs: '',
+    id: '',
+    geometry: {},
+    links: [],
+    properties: [],
+    srsName: '',
+    type: ''
+  }
+  },
+  beforeMount() {
+      fetchData(this)
   }
 }
 </script>

@@ -4,31 +4,6 @@
     </div>
 </template>
 
-<style scoped>
-.map {
-    height: 480px;
-    width: 540px;
-    position: relative;
-}
-
-#info {
-    position: absolute;
-    display: inline-block;
-    height: auto;
-    width: auto;
-    z-index: 100;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 4px;
-    padding: 5px;
-    left: 50%;
-    transform: translateX(3%);
-    visibility: hidden;
-    pointer-events: none;
-}
-</style>
-
 <script>
 import * as api from '../backendApi.js';
 import Attribution from 'ol/control/Attribution.js';
@@ -205,6 +180,10 @@ export default {
     beforeMount() {
         // proxied data are not recognized as GeoData, "restore". A better way?
         var geoData = this.geoData
+        if (!geoData.type) {
+            console.log("No geoData type, Skipping")
+            return
+        }
         var rawData = {
             type: geoData.type
         }

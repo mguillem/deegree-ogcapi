@@ -27,8 +27,7 @@
                                         <td aria-colindex="1" role="cell" class="">
                                             <div class="card"><!---->
                                                 <div class="card-header">
-                                                    <a target="_self" v-bind:href="featureHref(feature)" class="">{{
-                                                        feature.id }}</a>
+                                                    <SmartLink :href="featureHref(feature)">{{feature.id }}</SmartLink>
                                                 </div>
                                                 <div class="card-body"><!----><!---->
                                                     <div class="card-text">
@@ -76,7 +75,7 @@
                     </div>
                 </div>
                 <div class="col-5">
-                    <FeatureMap :geoData="this" />
+                    <FeatureMap v-if="geoData.type" :geoData="geoData" />
                 </div>
 
             </div>
@@ -89,6 +88,7 @@
 import { BApp, BPagination } from 'bootstrap-vue-next'
 import TdAttributeValue from './TdAttributeValue.vue'
 import FeatureMap from './FeatureMap.vue'
+import SmartLink from './SmartLink.vue'
 import * as api from '../backendApi.js';
 </script>
 
@@ -130,20 +130,15 @@ function addGeneratedIds(list, prefix) {
     return list
 }
 
+async function fetchData(comp) {
+    const data = await api.fetchData()
+    
+    comp.update(data)
+    fetchFeatureCollectionItem(comp)
+}
+
 export default {
     name: 'FeatureItems',
-    props: {
-        type: String,
-        features: [{
-            id: String,
-            properties: [{
-                id: String,
-                boreholePath: String
-            }]
-        },
-        ],
-        numberMatched: Number
-    },
     watch: {
         // whenever question changes, this function will run
         currentPage(newCurrentPage, oldCurrentPage) {
@@ -153,16 +148,20 @@ export default {
     },
     data() {
         return {
-            title: '',
-            description: '',
-            currentItems: [],
-            paging: 0,
             currentPage: 1,
-            perPage: 10,
-            totalItems: 0,
-            numberOfPages: 1,
+            currentItems: [],
             defaultLimit: 10,
             defaultOffset: 0,
+            description: '',
+            feature: [],
+            geoData: {},
+            numberOfPages: 1,
+            numberMatched: 0,
+            paging: 0,
+            perPage: 10,
+            title: '',
+            totalItems: 0,
+            type: ''
         }
     },
     methods: {
@@ -172,11 +171,17 @@ export default {
         },
         updateFromResults(items) {
             this.currentItems = addGeneratedIds(items.features, "page" + this.currentPage)
+        },
+        update(data) {
+            this.numberMatched = data.numberMatched
+            this.geoData.type = data.type
+            this.geoData.features = data.features
+            console.log("data.features", data.features)
+            this.currentItems = addGeneratedIds(data.features, "page" + this.currentPage)
         }
     },
     beforeMount() {
-        fetchFeatureCollectionItem(this)
-        this.currentItems = addGeneratedIds(this.features, "page" + this.currentPage)
+        fetchData(this)
     }
 }
 </script>

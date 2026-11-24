@@ -16,7 +16,7 @@
                                     <div class="col-sm-2">Links</div>
                                     <div class="col-md-10">
                                         <div v-for="link in dataset.links" :key="link.title">
-                                            <a v-cloak v-if="link.type == 'text/html' && link.rel != 'alternate'" v-bind:href="link.href">{{ link.title }}</a>
+                                            <SmartLink v-if="link.type == 'text/html' && link.rel != 'alternate'" :href="link.href">{{ link.title }}</SmartLink>
                                         </div>
                                     </div>
                                 </div>
@@ -35,33 +35,36 @@
     </div>
 </template>
 
+<script setup>
+import * as api from '../backendApi.js';
+import SmartLink from './SmartLink.vue'
+</script>
 
 <script>
+async function fetchData(comp) {
+    const data = await api.fetchData() 
+    data.datasets.sort(function compare(a, b) {
+        return a.title.localeCompare(b.title);
+    })
+    for (var prop in data) {
+        comp[prop] = data[prop]
+    }
+}
+    
+
 export default {
   name: 'DataSets',
-  props: {
-    contact: {
-      name: String,
-      url: String,
-      email: String
-    }, 
-    description: String,
-    datasets: [{
-      name: String,
-      title: String,
-      links: [{
-          href: String,
-          type: String,
-          title: String,
-      }]
-    }],
-    links: [{
-        href: String,
-        rel: String,
-        type: String,
-        title: String,
-    }],
-    title: String
+  data() {
+    return {
+      contact: {}, 
+      description: '',
+      datasets: [],
+      links: [],
+      title: ''
+    }
+  },
+  beforeMount() {
+      fetchData(this)
   }
 }
 </script>

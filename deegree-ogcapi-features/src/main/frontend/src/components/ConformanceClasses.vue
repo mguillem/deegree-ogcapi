@@ -19,10 +19,21 @@
 
 
 <script>
+import * as api from '../backendApi.js';
+
+async function fetchData(comp) {
+    const data = await api.fetchData() 
+    comp.conformsTo = data.conformsTo
+}
+
 export default {
   name: 'ConformanceClasses',
-  props: {
-    conformsTo: [String]
+  data() {
+    return {
+    conformsTo: []
+    }},
+  beforeMount() {
+      fetchData(this)
   }
 }
 </script>

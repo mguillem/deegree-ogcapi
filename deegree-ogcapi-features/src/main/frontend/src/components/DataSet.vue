@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col-sm-3">Collections</div>
                 <div class="col-md-9">
-                    <a v-cloak v-bind:href="collectionlink.href" >{{ collectionlink.title }}</a>
+                    <SmartLink :href="collectionlink.href" >{{ collectionlink.title }}</SmartLink>
                 </div>
             </div>
             <div class="row">
@@ -19,7 +19,7 @@
             <div class="row">
                 <div class="col-sm-3">Conformance Classes</div>
                 <div class="col-md-9">
-                    <a v-cloak v-bind:href="conformanceLink.href" >{{ conformanceLink.title }}</a>
+                    <SmartLink :href="conformanceLink.href" >{{ conformanceLink.title }}</SmartLink>
                 </div>
             </div>
             <div class="row" v-if="metadataLink">
@@ -47,22 +47,50 @@
 
 <script setup>
 import {BApp} from 'bootstrap-vue-next'
+import * as api from '../backendApi.js';
+import SmartLink from './SmartLink.vue'
 </script>
 
 <script>
+
+function firstByRel(array, rel, otherThanHtmlOrTest) {
+    var result = array.find((element) => element.rel === rel && (element.type === 'text/html' || element.type === 'text/plain'));
+    if (result == null && otherThanHtmlOrTest) {
+        result = array.find((element) => element.rel === rel);
+    }
+    return result 
+}
+
+
+async function fetchData(comp) {
+    const data = await api.fetchData() 
+    comp.contact = data.contact
+    comp.description = data.description
+    comp.title = data.title
+    
+    comp.apilink = firstByRel(data.links, 'service-doc')
+    comp.collectionlink = firstByRel(data.links, 'data')
+    console.log("comp.collectionlink", comp.collectionlink)
+    comp.conformanceLink = firstByRel(data.links, 'conformance')
+    comp.metadataLink = firstByRel(data.links, 'describedBy', true)
+    comp.licenseLink = firstByRel(data.links, 'license')
+}
+
 export default {
-  props: {
-    description: String,
-    title: String,
-    apilink: Object, 
-    collectionlink: Object,
-    conformanceLink: Object,
-    metadataLink: Object,
-    licenseLink: Object,
-    contact: {
-      name: String,
-      email: String
-    } 
+    data() {
+      return {
+        description: '',
+        title: '',
+        apilink: {}, 
+        collectionlink: {},
+        conformanceLink: {},
+        metadataLink: {},
+        licenseLink: {},
+        contact: {}
+      }
+    },
+  beforeMount() {
+      fetchData(this)
   }
 }
 </script>

@@ -1,19 +1,23 @@
 <template>
     <div class="container">
         <div class="row" id="content">
-            <div class="col-lg-12" >
+            <div class="col-lg-12">
                 <h1 v-cloak class="mt-5">{{ title }}</h1>
                 <div v-cloak>{{ description }}</div>
                 <div class="row mt-2">
                     <div class="col-sm-3">Links</div>
                     <div class="col-md-9">
                         <div v-for="link in links" :key="link.title">
-                            <a v-cloak v-if="link.type == 'text/html' && link.rel != 'alternate' && link.rel != 'describedBy'" v-bind:href="link.href" >{{ link.title }}</a>
-                            <a v-cloak v-else-if="link.type == 'application/json' && link.rel == 'enclosure'" v-bind:href="link.href + '&f=json'" v-bind:download="id + '.json'">{{ link.title }}</a>
-                            <a v-cloak v-else-if="link.type == 'application/xml' && link.rel == 'enclosure'" v-bind:href="link.href + '&f=xml'" v-bind:download="id + '.xml'">{{ link.title }}</a>
+                            <SmartLink
+                                v-if="link.type == 'text/html' && link.rel != 'alternate' && link.rel != 'describedBy'"
+                                v-bind:href="link.href">{{ link.title }}</SmartLink>
+                            <a v-cloak v-else-if="link.type == 'application/json' && link.rel == 'enclosure'"
+                                v-bind:href="link.href + '&f=json'" v-bind:download="id + '.json'">{{ link.title }}</a>
+                            <a v-cloak v-else-if="link.type == 'application/xml' && link.rel == 'enclosure'"
+                                v-bind:href="link.href + '&f=xml'" v-bind:download="id + '.xml'">{{ link.title }}</a>
                         </div>
                         <div v-for="metadataLink in metadataLinks" :key="metadataLink.title">
-                            <a v-cloak v-bind:href="metadataLink.href" >{{ metadataLink.title }}</a>
+                            <a v-cloak v-bind:href="metadataLink.href">{{ metadataLink.title }}</a>
                         </div>
                     </div>
                 </div>
@@ -46,16 +50,16 @@
                 <div class="row mt-2" v-if="storageCrs">
                     <div class="col-md-3">Storage CRS</div>
                     <div class="col-md-9">
-                      <div class="row">
-                        <div v-cloak class="col-md-12" >{{ storageCrs }}</div>
-                      </div>
+                        <div class="row">
+                            <div v-cloak class="col-md-12">{{ storageCrs }}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-2" v-if="itemType">
                     <div class="col-md-3">Item type</div>
                     <div class="col-md-9">
                         <div class="row">
-                            <div v-cloak class="col-md-12" >{{ itemType }}</div>
+                            <div v-cloak class="col-md-12">{{ itemType }}</div>
                         </div>
                     </div>
                 </div>
@@ -65,24 +69,27 @@
 </template>
 <style scoped>
 .map {
-  height: 400px;
-  width: 100%;
+    height: 400px;
+    width: 100%;
 }
 </style>
+<script setup>
+import SmartLink from './SmartLink.vue'
+</script>
 
 <script>
 import Attribution from 'ol/control/Attribution.js';
-import {defaults} from 'ol/control/defaults';
+import { defaults } from 'ol/control/defaults';
 import Feature from 'ol/Feature.js';
 import Fill from 'ol/style/Fill.js';
-import {fromExtent} from 'ol/geom/Polygon';
+import { fromExtent } from 'ol/geom/Polygon';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import Map from 'ol/Map.js';
 import * as olExtent from 'ol/extent';
 import * as olLoadingstrategy from 'ol/loadingstrategy';
 import * as olProj from 'ol/proj';
 import proj4 from 'proj4';
-import {register} from 'ol/proj/proj4.js';
+import { register } from 'ol/proj/proj4.js';
 import Stroke from 'ol/style/Stroke.js';
 import Style from 'ol/style/Style.js';
 import TileLayer from 'ol/layer/Tile.js'
@@ -90,24 +97,25 @@ import TileWMS from 'ol/source/TileWMS.js';
 import View from 'ol/View.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
+import * as api from '../backendApi.js';
 
 var map
-function setMapBackgroundAndExtent(wmsUrl, wmsVersion, wmsLayers, crsCode, projDef, source, bbox){
+function setMapBackgroundAndExtent(wmsUrl, wmsVersion, wmsLayers, crsCode, projDef, source, bbox) {
     map = new Map({
-      target: 'map',
-      controls: defaults({attribution: false}).extend([attribution]),
-      layers: [
-        extentLayer
-      ],
-      view: new View({
-        projection: 'EPSG:4326',
-        center: [10.0143, 53.5537],
-        zoom: 14,
-        constrainResolution: true
-      })
+        target: 'map',
+        controls: defaults({ attribution: false }).extend([attribution]),
+        layers: [
+            extentLayer
+        ],
+        view: new View({
+            projection: 'EPSG:4326',
+            center: [10.0143, 53.5537],
+            zoom: 14,
+            constrainResolution: true
+        })
     });
     var crsCodeRegistered = registerCrs(crsCode, projDef);
-    if( crsCodeRegistered ){
+    if (crsCodeRegistered) {
         var userConfig = olProj.get(crsCode);
         map.setView(
             new View({
@@ -118,11 +126,11 @@ function setMapBackgroundAndExtent(wmsUrl, wmsVersion, wmsLayers, crsCode, projD
     }
 
     var wmsLayer = new TileLayer({
-      source: new TileWMS({
-        url: wmsUrl,
-        params: {'VERSION': wmsVersion, 'LAYERS': wmsLayers},
-        attributions: source
-      })
+        source: new TileWMS({
+            url: wmsUrl,
+            params: { 'VERSION': wmsVersion, 'LAYERS': wmsLayers },
+            attributions: source
+        })
     });
     map.getLayers().insertAt(0, wmsLayer);
     setExtent(bbox, crsCodeRegistered, crsCode);
@@ -130,29 +138,29 @@ function setMapBackgroundAndExtent(wmsUrl, wmsVersion, wmsLayers, crsCode, projD
 
 
 var attribution = new Attribution({
-  collapsible: false,
+    collapsible: false,
 });
 var extentSource = new VectorSource({
-  format: new GeoJSON(),
-   strategy: olLoadingstrategy.all
+    format: new GeoJSON(),
+    strategy: olLoadingstrategy.all
 });
 var extentLayer = new VectorLayer({
-   source: extentSource,
-   style: new Style({
-    stroke: new Stroke({
-      color: 'blue',
-      width: 1
-    }),
-    fill: new Fill({
-      color: 'rgba(0, 0, 255, 0.1)'
+    source: extentSource,
+    style: new Style({
+        stroke: new Stroke({
+            color: 'blue',
+            width: 1
+        }),
+        fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+        })
     })
-  })
 });
 
 
-function setExtent(bbox, crsCodeRegistered, crsCode){
+function setExtent(bbox, crsCodeRegistered, crsCode) {
     var boundingExtent = olExtent.boundingExtent([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
-    if( crsCodeRegistered ) {
+    if (crsCodeRegistered) {
         boundingExtent = olProj.transformExtent(boundingExtent, 'EPSG:4326', crsCode);
     }
 
@@ -164,34 +172,61 @@ function setExtent(bbox, crsCodeRegistered, crsCode){
 
     var extentGeom = fromExtent(boundingExtent)
     extentGeom.scale(1.2);
-    map.getView().fit(extentGeom.getExtent(), {'maxZoom':20, 'nearest': true} );
+    map.getView().fit(extentGeom.getExtent(), { 'maxZoom': 20, 'nearest': true });
 }
 
-function registerCrs(crsCode, projDef){
-   if( crsCode != null && projDef != null ) {
-       proj4.defs(crsCode, projDef);
-       register(proj4);
-       return true;
-   }
-   return false;
+function registerCrs(crsCode, projDef) {
+    if (crsCode != null && projDef != null) {
+        proj4.defs(crsCode, projDef);
+        register(proj4);
+        return true;
+    }
+    return false;
 }
+
+async function fetchConfigAndSetExtent(bbox, callback) {
+    var configUrl = api.getMapConfigUrl();
+
+    const response = await fetch(configUrl, { headers: { 'Accept': 'application/json' } });
+    if (response.status == 200) {
+        const json = await response.json();
+        callback(json.wmsUrl, json.wmsVersion, json.wmsLayers, json.crsCode, json.crsProj4Definition, json.source, bbox);
+    } else {
+        callback('http://sg.geodatenzentrum.de/wms_dtk250', '1.1.1', 'dtk250', null, null, null, bbox);
+    }
+}
+
+async function fetchData(comp) {
+    const data = await api.fetchData()
+    comp.title = data.title
+    comp.description = data.description
+    comp.links = data.links
+    comp.crs = data.crs
+    comp.itemType = data.itemType
+    comp.extent = data.extent
+    
+    comp.metadataLinks = api.findMetadataLinks(data.links);
+    fetchConfigAndSetExtent(data.extent.spatial.bbox[0], setMapBackgroundAndExtent);
+}
+
 
 export default {
     name: 'FeatureCollection',
-
-  props: {
-    id: String,
-    title: String,
-    description: String,
-    links: [ {href: String, title: String} ],
-    metadataLinks: [ {href: String, title: String} ],
-    itemType: String,
-    crs: [String, Array],
-    storageCrs: String,
-    extent: { temporal: { interval: [String] }}
-  },
-  methods: {
-    setMapBackgroundAndExtent: setMapBackgroundAndExtent
-  }
+    data() {
+        return {
+            id: '',
+            title: '',
+            description: '',
+            links: [],
+            metadataLinks: [],
+            itemType: '',
+            crs: '',
+            storageCrs: '',
+            extent: {}
+        }
+    },
+    beforeMount() {
+        fetchData(this)
+    }
 }
 </script>
