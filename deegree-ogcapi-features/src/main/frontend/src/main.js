@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import ConformanceClasses from './components/ConformanceClasses.vue'
 import DataSets from './components/DataSets.vue'
 import DataSet from './components/DataSet.vue'
-import CustomFooter from './components/CustomFooter.vue'
 import MainPage from './components/MainPage.vue'
 import FeatureCollections from './components/FeatureCollections.vue'
 import FeatureCollection from './components/FeatureCollection.vue'
@@ -160,17 +159,6 @@ else {
     })
 }
 
-$.ajax({
-    dataType: "json",
-    url: api.getHtmlConfigUrl(),
-    success: function(data) {
-        if (data.documentationUrl) {
-            data.helpUrl = data.documentationUrl;
-        }
-        createApp(CustomFooter, data).mount('#footerWrapper')
-        console.log('Got config data. Creating', data)
-    }
-})
 /*
 var footerApp = new Vue({
   el: '#footer',

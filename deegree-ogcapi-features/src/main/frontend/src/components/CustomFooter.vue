@@ -26,16 +26,37 @@
 
 <script setup>
 import {BApp} from 'bootstrap-vue-next'
+import * as api from '../backendApi.js';
 </script>
 
 <script>
+async function fetchData(comp) {
+    var url = api.getHtmlConfigUrl()
+    const response = await fetch(url, {
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    const result = await response.json();
+    console.log('Got config data. Creating', result)
+    if (result.documentationUrl) {
+        comp.helpUrl = result.documentationUrl;
+    }
+    comp.legalNoticeUrl = result.legalNoticeUrl
+    comp.privacyUrl = result.privacyUrl
+}
+
 export default {
   name: 'CustomFooter',
-  props: {
-	documentationUrl: String,
-    helpUrl: String,
-    legalNoticeUrl: String,
-    privacyUrl: String
+  data() {
+      return {
+        helpUrl: '',
+        legalNoticeUrl: '',
+        privacyUrl: ''
+      }
+  },
+  beforeMount() {
+    fetchData(this)
   }
 }
 </script>

@@ -41,12 +41,13 @@
     </header>
 
     <div id='appContent'></div>
-    <div id='footerWrapper'></div>
+    <CustomFooter></CustomFooter>
   </BApp>
 </template>
 
 <script setup>
 import {BApp} from 'bootstrap-vue-next'
+import CustomFooter from './CustomFooter.vue'
 import '../main.css'
 </script>
 
